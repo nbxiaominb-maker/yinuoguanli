@@ -1,0 +1,24 @@
+.logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 16px;
+  border-radius: 8px;
+}
+
+.logo h2 {
+  color: white;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.ant-layout-header {
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+
+.ant-layout-footer {
+  background: #f0f2f5;
+}

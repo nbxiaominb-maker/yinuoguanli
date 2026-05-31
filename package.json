@@ -1,0 +1,24 @@
+{
+  "name": "yinuokeji-management-system",
+  "version": "1.0.0",
+  "description": "一诺科技管理系统 with React and Node.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "server:build": "cd server && npm run build",
+    "client:build": "cd client && npm run build",
+    "build": "npm run server:build && npm run client:build",
+    "start": "cd server && npm start",
+    "test": "npm run client:test && npm run server:test",
+    "client:test": "cd client && npm test",
+    "server:test": "cd server && npm test"
+  },
+  "keywords": ["enterprise", "management", "react", "nodejs", "typescript"],
+  "author": "一诺科技团队",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
