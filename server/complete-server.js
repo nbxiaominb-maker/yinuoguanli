@@ -390,6 +390,187 @@ app.get('/api/supply-chain/kpi', (req, res) => {
   }
 });
 
+// 供应商CRUD操作
+app.post('/api/supply-chain/suppliers', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin和manager可以创建供应商
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      return res.status(403).json({ error: 'Permission denied - insufficient role' });
+    }
+
+    const newSupplier = {
+      id: supplyChainData.suppliers.length + 1,
+      ...req.body,
+      status: req.body.status || 'active',
+      created_at: new Date().toISOString().split('T')[0]
+    };
+
+    supplyChainData.suppliers.push(newSupplier);
+    res.status(201).json(newSupplier);
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to create supplier' });
+  }
+});
+
+app.put('/api/supply-chain/suppliers/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin和manager可以更新供应商
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      return res.status(403).json({ error: 'Permission denied - insufficient role' });
+    }
+
+    const supplierIndex = supplyChainData.suppliers.findIndex(s => s.id === parseInt(req.params.id));
+    if (supplierIndex === -1) {
+      return res.status(404).json({ error: 'Supplier not found' });
+    }
+
+    Object.assign(supplyChainData.suppliers[supplierIndex], req.body);
+    res.json(supplyChainData.suppliers[supplierIndex]);
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to update supplier' });
+  }
+});
+
+app.delete('/api/supply-chain/suppliers/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin可以删除供应商
+    if (userRole !== 'admin') {
+      return res.status(403).json({ error: 'Permission denied - admin role required' });
+    }
+
+    const supplierIndex = supplyChainData.suppliers.findIndex(s => s.id === parseInt(req.params.id));
+    if (supplierIndex === -1) {
+      return res.status(404).json({ error: 'Supplier not found' });
+    }
+
+    supplyChainData.suppliers.splice(supplierIndex, 1);
+    res.json({ message: 'Supplier deleted successfully' });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to delete supplier' });
+  }
+});
+
+// 采购订单CRUD操作
+app.post('/api/supply-chain/purchase-orders', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin和manager可以创建采购订单
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      return res.status(403).json({ error: 'Permission denied - insufficient role' });
+    }
+
+    const newOrder = {
+      id: supplyChainData.purchaseOrders.length + 1,
+      order_number: `PO${new Date().getFullYear()}${String(supplyChainData.purchaseOrders.length + 1).padStart(3, '0')}`,
+      ...req.body,
+      status: req.body.status || 'pending',
+      created_at: new Date().toISOString().split('T')[0]
+    };
+
+    supplyChainData.purchaseOrders.push(newOrder);
+    res.status(201).json(newOrder);
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to create purchase order' });
+  }
+});
+
+app.put('/api/supply-chain/purchase-orders/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin和manager可以更新采购订单
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      return res.status(403).json({ error: 'Permission denied - insufficient role' });
+    }
+
+    const orderIndex = supplyChainData.purchaseOrders.findIndex(o => o.id === parseInt(req.params.id));
+    if (orderIndex === -1) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    Object.assign(supplyChainData.purchaseOrders[orderIndex], req.body);
+    res.json(supplyChainData.purchaseOrders[orderIndex]);
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to update purchase order' });
+  }
+});
+
+app.delete('/api/supply-chain/purchase-orders/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const userRole = decoded.role;
+
+    // 权限检查：只有admin可以删除采购订单
+    if (userRole !== 'admin') {
+      return res.status(403).json({ error: 'Permission denied - admin role required' });
+    }
+
+    const orderIndex = supplyChainData.purchaseOrders.findIndex(o => o.id === parseInt(req.params.id));
+    if (orderIndex === -1) {
+      return res.status(404).json({ error: 'Purchase order not found' });
+    }
+
+    supplyChainData.purchaseOrders.splice(orderIndex, 1);
+    res.json({ message: 'Purchase order deleted successfully' });
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    res.status(500).json({ error: 'Failed to delete purchase order' });
+  }
+});
+
 // 库存管理
 const inventoryData = {
   items: [

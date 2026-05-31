@@ -16,6 +16,7 @@ import {
   DatePicker,
   InputNumber,
   message,
+  Popconfirm,
 } from 'antd'
 import {
   PlusOutlined,
@@ -23,22 +24,36 @@ import {
   DollarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
 import api from '../utils/api'
 import { logDebug, logError } from '../utils/logger'
+import { useAuthStore } from '../stores/authStore'
 
 const SupplyChain = () => {
+  const { user } = useAuthStore()
   const [suppliers, setSuppliers] = useState([])
   const [purchaseOrders, setPurchaseOrders] = useState([])
   const [kpiData, setKpiData] = useState({})
   const [loading, setLoading] = useState(true)
   const [modalVisible, setModalVisible] = useState(false)
   const [modalType, setModalType] = useState('') // 'supplier' or 'order'
+  const [editingRecord, setEditingRecord] = useState(null)
   const [form] = Form.useForm()
 
   useEffect(() => {
     fetchSupplyChainData()
   }, [])
+
+  // 权限检查函数
+  const canEdit = () => {
+    return user?.role === 'admin' || user?.role === 'manager'
+  }
+
+  const canDelete = () => {
+    return user?.role === 'admin'
+  }
 
   const fetchSupplyChainData = async () => {
     try {
@@ -63,14 +78,59 @@ const SupplyChain = () => {
     }
   }
 
-  const handleModalOpen = (type) => {
+  const handleModalOpen = (type, record = null) => {
     setModalType(type)
+    setEditingRecord(record)
+    if (record) {
+      // 编辑模式：填充表单数据
+      if (type === 'supplier') {
+        form.setFieldsValue({
+          name: record.name,
+          code: record.code,
+          contact: record.contact,
+          phone: record.phone,
+          email: record.email,
+          category: record.category,
+          rating: record.rating,
+          address: record.address,
+        })
+      } else if (type === 'order') {
+        form.setFieldsValue({
+          supplier_id: record.supplier_id,
+          order_date: record.order_date,
+          delivery_date: record.delivery_date,
+          total_amount: record.total_amount,
+          priority: record.priority,
+          status: record.status,
+        })
+      }
+    } else {
+      // 新建模式：重置表单
+      form.resetFields()
+    }
     setModalVisible(true)
   }
 
   const handleModalClose = () => {
     setModalVisible(false)
     form.resetFields()
+    setEditingRecord(null)
+  }
+
+  const handleDelete = async (type, id) => {
+    try {
+      if (type === 'supplier') {
+        await api.delete(`/supply-chain/suppliers/${id}`)
+        message.success('供应商删除成功')
+      } else if (type === 'order') {
+        await api.delete(`/supply-chain/purchase-orders/${id}`)
+        message.success('采购订单删除成功')
+      }
+      fetchSupplyChainData()
+    } catch (error) {
+      logError('Failed to delete record', { error })
+      message.error('删除失败')
+    }
   }
 
   const handleSubmit = async () => {
@@ -78,18 +138,32 @@ const SupplyChain = () => {
       const values = await form.validateFields()
 
       if (modalType === 'supplier') {
-        await api.post('/supply-chain/suppliers', values)
-        message.success('供应商创建成功')
+        if (editingRecord) {
+          // 编辑供应商
+          await api.put(`/supply-chain/suppliers/${editingRecord.id}`, values)
+          message.success('供应商更新成功')
+        } else {
+          // 创建供应商
+          await api.post('/supply-chain/suppliers', values)
+          message.success('供应商创建成功')
+        }
       } else if (modalType === 'order') {
-        await api.post('/supply-chain/purchase-orders', values)
-        message.success('采购订单创建成功')
+        if (editingRecord) {
+          // 编辑订单
+          await api.put(`/supply-chain/purchase-orders/${editingRecord.id}`, values)
+          message.success('采购订单更新成功')
+        } else {
+          // 创建订单
+          await api.post('/supply-chain/purchase-orders', values)
+          message.success('采购订单创建成功')
+        }
       }
 
       handleModalClose()
       fetchSupplyChainData()
     } catch (error) {
-      logError('Failed to create record', { error })
-      message.error('创建失败')
+      logError('Failed to save record', { error })
+      message.error('保存失败')
     }
   }
 
@@ -141,6 +215,37 @@ const SupplyChain = () => {
         <Tag color={status === 'active' ? 'green' : 'red'}>
           {status === 'active' ? '活跃' : '停用'}
         </Tag>
+      ),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_, record) => (
+        <Space size='small'>
+          {canEdit() && (
+            <Button
+              type='link'
+              size='small'
+              icon={<EditOutlined />}
+              onClick={() => handleModalOpen('supplier', record)}
+            >
+              编辑
+            </Button>
+          )}
+          {canDelete() && (
+            <Popconfirm
+              title='确定要删除此供应商吗？'
+              description='此操作不可恢复'
+              onConfirm={() => handleDelete('supplier', record.id)}
+              okText='确定'
+              cancelText='取消'
+            >
+              <Button type='link' size='small' danger icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
       ),
     },
   ]
@@ -197,6 +302,37 @@ const SupplyChain = () => {
           </Tag>
         )
       },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_, record) => (
+        <Space size='small'>
+          {canEdit() && (
+            <Button
+              type='link'
+              size='small'
+              icon={<EditOutlined />}
+              onClick={() => handleModalOpen('order', record)}
+            >
+              编辑
+            </Button>
+          )}
+          {canDelete() && (
+            <Popconfirm
+              title='确定要删除此订单吗？'
+              description='此操作不可恢复'
+              onConfirm={() => handleDelete('order', record.id)}
+              okText='确定'
+              cancelText='取消'
+            >
+              <Button type='link' size='small' danger icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          )}
+        </Space>
+      ),
     },
   ]
 
@@ -295,7 +431,15 @@ const SupplyChain = () => {
       </Row>
 
       <Modal
-        title={modalType === 'supplier' ? '添加供应商' : '创建采购订单'}
+        title={
+          modalType === 'supplier'
+            ? editingRecord
+              ? '编辑供应商'
+              : '添加供应商'
+            : editingRecord
+              ? '编辑采购订单'
+              : '创建采购订单'
+        }
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={handleModalClose}
