@@ -8,6 +8,12 @@ import {
   BarChartOutlined,
   SettingOutlined,
   LogoutOutlined,
+  ShoppingOutlined,
+  InboxOutlined,
+  ToolOutlined,
+  CustomerServiceOutlined,
+  TeamOutlined as HROutlined,
+  AuditOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
@@ -48,6 +54,38 @@ const Layout = () => {
       key: '/financial',
       icon: <DollarOutlined />,
       label: '财务管理',
+    },
+    {
+      key: 'erp-label',
+      label: 'ERP模块',
+      type: 'group',
+      children: [
+        {
+          key: '/supply-chain',
+          icon: <ShoppingOutlined />,
+          label: '供应链管理',
+        },
+        {
+          key: '/inventory',
+          icon: <InboxOutlined />,
+          label: '库存管理',
+        },
+        {
+          key: '/manufacturing',
+          icon: <ToolOutlined />,
+          label: '生产制造',
+        },
+        {
+          key: '/crm',
+          icon: <CustomerServiceOutlined />,
+          label: '客户关系',
+        },
+        {
+          key: '/hr',
+          icon: <HROutlined />,
+          label: '人力资源',
+        },
+      ],
     },
     {
       key: '/reports',

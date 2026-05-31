@@ -342,6 +342,232 @@ app.get('/api/financial', (req, res) => {
   }
 });
 
+// ERP扩展模块 - 供应链管理
+const supplyChainData = {
+  suppliers: [
+    { id: 1, name: '一诺供应商A', code: 'S001', contact: '张三', phone: '13800138000', email: 'zhangsan@yinuokeji.com', category: '原材料', rating: 'A', status: 'active' },
+    { id: 2, name: '科技设备供应商', code: 'S002', contact: '李四', phone: '13900139000', category: '设备', rating: 'B', status: 'active' }
+  ],
+  purchaseOrders: [
+    { id: 1, order_number: 'PO202601001', supplier_id: 1, order_date: '2026-05-15', status: 'pending', total_amount: 50000, priority: 'high' }
+  ]
+};
+
+app.get('/api/supply-chain/suppliers', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ suppliers: supplyChainData.suppliers });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve suppliers' });
+  }
+});
+
+app.get('/api/supply-chain/purchase-orders', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ purchase_orders: supplyChainData.purchaseOrders });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve purchase orders' });
+  }
+});
+
+app.get('/api/supply-chain/kpi', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({
+      supplier_count: supplyChainData.suppliers.length,
+      active_suppliers: supplyChainData.suppliers.filter(s => s.status === 'active').length,
+      pending_orders: supplyChainData.purchaseOrders.filter(o => o.status === 'pending').length,
+      total_purchase_value: supplyChainData.purchaseOrders.reduce((sum, o) => sum + o.total_amount, 0),
+      on_time_delivery_rate: 85.5,
+      quality_acceptance_rate: 92.3
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve supply chain KPI' });
+  }
+});
+
+// 库存管理
+const inventoryData = {
+  items: [
+    { id: 1, item_code: 'INV001', item_name: '原材料A', category: '原材料', quantity: 500, unit: 'kg', min_stock: 100, max_stock: 1000, unit_cost: 50, total_value: 25000, status: 'in_stock' },
+    { id: 2, item_code: 'INV002', item_name: '电子元件B', category: '电子元件', quantity: 200, unit: '件', min_stock: 50, max_stock: 500, unit_cost: 120, total_value: 24000, status: 'in_stock' },
+    { id: 3, item_code: 'INV003', item_name: '包装材料C', category: '包装材料', quantity: 30, unit: '箱', min_stock: 50, max_stock: 200, unit_cost: 80, total_value: 2400, status: 'low_stock' }
+  ]
+};
+
+app.get('/api/inventory/items', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ inventory_items: inventoryData.items });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve inventory items' });
+  }
+});
+
+app.get('/api/inventory/kpi', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    const totalValue = inventoryData.items.reduce((sum, i) => sum + i.total_value, 0);
+    res.json({
+      total_items: inventoryData.items.length,
+      low_stock_items: inventoryData.items.filter(i => i.status === 'low_stock').length,
+      total_inventory_value: totalValue,
+      inventory_turnover_rate: 4.2,
+      stock_accuracy: 98.5,
+      stockout_rate: 2.1
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve inventory KPI' });
+  }
+});
+
+// 生产制造
+const manufacturingData = {
+  productionOrders: [
+    { id: 1, order_number: 'PROD001', product_name: '产品A', quantity: 1000, status: 'in_production', progress: 45, priority: 'high', start_date: '2026-05-20', planned_end_date: '2026-06-10' }
+  ],
+  workCenters: [
+    { id: 1, name: '车间A', capacity: 8, current_load: 6, utilization: 75 },
+    { id: 2, name: '装配线B', capacity: 20, current_load: 15, utilization: 75 }
+  ]
+};
+
+app.get('/api/manufacturing/production-orders', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ production_orders: manufacturingData.productionOrders });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve production orders' });
+  }
+});
+
+app.get('/api/manufacturing/kpi', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({
+      total_orders: manufacturingData.productionOrders.length,
+      in_production: manufacturingData.productionOrders.filter(o => o.status === 'in_production').length,
+      on_time_delivery_rate: 92.5,
+      production_efficiency: 87.3,
+      capacity_utilization: 78.5,
+      quality_rate: 96.8,
+      work_center_utilization: 76.8
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve manufacturing KPI' });
+  }
+});
+
+// 客户关系管理
+const crmData = {
+  customers: [
+    { id: 1, customer_code: 'CUST001', company_name: '客户公司A', contact_person: '王经理', phone: '13600136000', industry: '制造业', tier: 'A', status: 'active', satisfaction_score: 4.5, total_purchases: 850000 },
+    { id: 2, customer_code: 'CUST002', company_name: '科技公司B', contact_person: '李总', phone: '13700137000', industry: '科技', tier: 'B', status: 'active', satisfaction_score: 4.2, total_purchases: 450000 }
+  ],
+  opportunities: [
+    { id: 1, opportunity_name: '大型设备采购项目', customer_id: 1, stage: 'proposal', value: 250000, probability: 60, expected_close_date: '2026-07-30' }
+  ]
+};
+
+app.get('/api/crm/customers', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ customers: crmData.customers });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve customers' });
+  }
+});
+
+app.get('/api/crm/opportunities', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ opportunities: crmData.opportunities });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve opportunities' });
+  }
+});
+
+app.get('/api/crm/kpi', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    const avgSatisfaction = crmData.customers.reduce((sum, c) => sum + c.satisfaction_score, 0) / crmData.customers.length;
+    res.json({
+      total_customers: crmData.customers.length,
+      active_customers: crmData.customers.filter(c => c.status === 'active').length,
+      total_opportunities: crmData.opportunities.length,
+      total_opportunity_value: crmData.opportunities.reduce((sum, o) => sum + o.value, 0),
+      avg_satisfaction_score: Math.round(avgSatisfaction * 10) / 10,
+      customer_retention_rate: 85.2,
+      conversion_rate: 23.5
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve CRM KPI' });
+  }
+});
+
+// 人力资源管理
+const hrData = {
+  employees: [
+    { id: 1, employee_code: 'EMP001', first_name: 'System', last_name: 'Administrator', position: '系统管理员', department_id: 1, status: 'active', salary: 15000, performance_score: 4.5 },
+    { id: 2, employee_code: 'EMP002', first_name: 'John', last_name: 'Manager', position: '部门经理', department_id: 2, status: 'active', salary: 25000, performance_score: 4.8 },
+    { id: 3, employee_code: 'EMP003', first_name: 'Jane', last_name: 'Developer', position: '软件工程师', department_id: 2, status: 'active', salary: 18000, performance_score: 4.2 }
+  ],
+  leaveRequests: [
+    { id: 1, employee_id: 3, leave_type: 'annual', start_date: '2026-06-01', end_date: '2026-06-05', days: 5, status: 'pending' }
+  ]
+};
+
+app.get('/api/hr/employees', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ employees: hrData.employees });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve employees' });
+  }
+});
+
+app.get('/api/hr/leave-requests', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    res.json({ leave_requests: hrData.leaveRequests });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve leave requests' });
+  }
+});
+
+app.get('/api/hr/kpi', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Authentication required' });
+    const avgPerformance = hrData.employees.reduce((sum, e) => sum + e.performance_score, 0) / hrData.employees.length;
+    const totalSalary = hrData.employees.reduce((sum, e) => sum + e.salary, 0);
+    res.json({
+      total_employees: hrData.employees.length,
+      active_employees: hrData.employees.filter(e => e.status === 'active').length,
+      avg_performance_score: Math.round(avgPerformance * 10) / 10,
+      total_payroll: totalSalary,
+      avg_salary: Math.round(totalSalary / hrData.employees.length),
+      employee_retention_rate: 92.5,
+      employee_satisfaction: 4.3
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve HR KPI' });
+  }
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({
@@ -358,18 +584,24 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log('='.repeat(50));
-  console.log(`🚀 Enterprise Management System Backend Server`);
+  console.log(`🚀 一诺科技管理系统 - ERP增强版`);
   console.log('='.repeat(50));
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`✅ Health check: http://localhost:${PORT}/health`);
-  console.log(`✅ API endpoints ready:`);
+  console.log(`✅ 服务器运行在端口 ${PORT}`);
+  console.log(`✅ 环境: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`✅ 健康检查: http://localhost:${PORT}/health`);
+  console.log(`✅ API端点已就绪:`);
+  console.log(`   核心模块:`);
   console.log(`   - POST   /api/auth/login`);
   console.log(`   - GET    /api/auth/me`);
   console.log(`   - GET    /api/users`);
   console.log(`   - GET    /api/departments`);
   console.log(`   - GET    /api/projects`);
   console.log(`   - GET    /api/financial/summary`);
-  console.log(`   - GET    /api/financial`);
+  console.log(`   ERP扩展模块:`);
+  console.log(`   - GET    /api/supply-chain/*`);
+  console.log(`   - GET    /api/inventory/*`);
+  console.log(`   - GET    /api/manufacturing/*`);
+  console.log(`   - GET    /api/crm/*`);
+  console.log(`   - GET    /api/hr/*`);
   console.log('='.repeat(50));
 });

@@ -11,6 +11,11 @@ import Projects from './pages/Projects'
 import Financial from './pages/Financial'
 import Reports from './pages/Reports'
 import Settings from './pages/Settings'
+import SupplyChain from './pages/SupplyChain'
+import Inventory from './pages/Inventory'
+import Manufacturing from './pages/Manufacturing'
+import CRM from './pages/CRM'
+import HR from './pages/HR'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -65,6 +70,11 @@ function App() {
           <Route path="departments" element={<Departments />} />
           <Route path="projects" element={<Projects />} />
           <Route path="financial" element={<Financial />} />
+          <Route path="supply-chain" element={<SupplyChain />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="manufacturing" element={<Manufacturing />} />
+          <Route path="crm" element={<CRM />} />
+          <Route path="hr" element={<HR />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
         </Route>
