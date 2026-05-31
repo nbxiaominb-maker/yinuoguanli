@@ -1,6 +1,6 @@
-# 企业管理系统 (Enterprise Management System)
+# 一诺科技管理系统
 
-一个功能完整的企业级管理系统，采用React + TypeScript + Ant Design前端，Node.js + Express后端，SQLite数据库。
+一诺科技的管理系统，采用React + TypeScript + Ant Design前端，Node.js + Express后端，SQLite数据库。
 
 ## 功能特性
 
@@ -47,7 +47,7 @@
 ## 项目结构
 
 ```
-enterprise-management-system/
+yinuokeji-management-system/
 ├── client/                 # React前端
 │   ├── src/
 │   │   ├── components/    # 组件
@@ -301,12 +301,12 @@ MIT License
 
 ## 联系方式
 
-- 项目地址: https://github.com/your-org/enterprise-management-system
-- 问题反馈: https://github.com/your-org/enterprise-management-system/issues
+- 项目地址: https://github.com/nbxiaominb-maker/yinuoguanli
+- 问题反馈: https://github.com/nbxiaominb-maker/yinuoguanli/issues
 
 ## 更新日志
 
-### v1.0.0 (2024)
+### v1.0.0 (2026-05-31)
 - ✨ 初始版本发布
 - 🎉 完成所有核心功能模块
 - 📊 实现数据可视化
@@ -315,4 +315,4 @@ MIT License
 
 ---
 
-**Enterprise Development Team** © 2024
+**一诺科技团队** © 2026
